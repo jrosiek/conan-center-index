@@ -11,6 +11,7 @@ from conan.errors import ConanInvalidConfiguration
 required_conan_version = ">=1.52.0"
 
 
+
 class PcapplusplusConan(ConanFile):
     name = "pcapplusplus"
     license = "Unlicense"
@@ -55,9 +56,15 @@ class PcapplusplusConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Windows shared builds for now")
         if self.settings.compiler.cppstd:
             # popen()/pclose() usage
-            check_min_cppstd(self, self._min_cppstd, gnu_extensions=not is_msvc(self))
+            check_min_cppstd(self, self._min_cppstd, gnu_extensions=self._is_gcc())
         if self.settings.os not in ("FreeBSD", "Linux", "Macos", "Windows"):
             raise ConanInvalidConfiguration(f"{self.settings.os} is not supported")
+
+    def _is_gcc(self):
+        """
+        Validates if the current compiler is ``gcc``.
+        """
+        return self.settings.get_safe("compiler") == "gcc"
 
     def validate_build(self):
         compiler_version = Version(self.settings.compiler.version)
